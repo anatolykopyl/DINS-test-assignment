@@ -15,18 +15,16 @@ with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
             name = row[1] + "*" + row[2]
             if name not in result:
                 result[name] = []
-                result[name].append({"time": timestamp, "value": 1})
+                result[name].append([timestamp, 1, 0])
             else:
                 for item in result[name]:
-                    if abs(timestamp - item["time"]) < 7.5 * 60:
-                        item["value"] += 1
+                    if abs(timestamp - item[0]) < 7.5 * 60:
+                        item[1] += 1
                         break
                 else:
-                    result[name].append({"time": timestamp, "value": 1})
+                    result[name].append([timestamp, 1, 0])
 
 is_anomaly(result)
-
-print(result)
 
 try:
     connection = MySQLdb.connect(host="127.0.0.1", user="user1", passwd="testserver", db="mydb")
@@ -38,13 +36,11 @@ try:
         for item in result[name]:
             cursor.execute("INSERT INTO result (timeframe_start, api_name, http_method, count_http_code_5xx, is_anomaly)"
                            "VALUES (\"{0}\", \"{1}\", \"{2}\", {3}, {4})"
-                           .format(str(datetime.datetime.fromtimestamp(item["time"]).strftime("%Y-%m-%d %H:%M:%S")),
-                                   name.split("*")[0], name[(name.find("*")+1):], item["value"], item["anomaly"]))
+                           .format(str(datetime.datetime.fromtimestamp(item[0]).strftime("%Y-%m-%d %H:%M:%S")),
+                                   name.split("*")[0], name[(name.find("*")+1):], item[1], item[2]))
 
     connection.commit()
     cursor.close()
     connection.close()
 except MySQLdb.Error as err:
     print("Connection error: {}".format(err))
-
-

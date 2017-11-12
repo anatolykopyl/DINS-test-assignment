@@ -25,16 +25,17 @@ with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
             if name not in result:
                 result[name] = []
 
-for name in result:
+with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
+    reader = csv.reader(csvfile, quotechar='"')
+
+    name = row[1] + "*" + row[2]
+
     for t in range(start_time, end_time, TIME_SPAN):
         result[name].append([t, 0, 0])
 
-with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
-    reader = csv.reader(csvfile, quotechar='"')
     for row in reader:
         if (row[3])[:1] == "5":
             timestamp = time.mktime(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S,%f").timetuple())
-            name = row[1] + "*" + row[2]
 
             for name in result:
                 for item in result[name]:

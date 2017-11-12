@@ -5,24 +5,41 @@ import MySQLdb
 
 from anomaly import is_anomaly
 
-
+TIME_SPAN = 900
 result = {}
+with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
+    reader = csv.reader(csvfile, quotechar='"')
+    for row in reader:
+        if row[0] != "ts":
+            timestamp = time.mktime(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S,%f").timetuple())
+
+            name = row[1] + "*" + row[2]
+
+            if 'start_time' not in locals():
+                start_time = timestamp
+            start_time = int(min(start_time, timestamp))
+            if 'end_time' not in locals():
+                end_time = timestamp
+            end_time = int(max(end_time, timestamp))
+
+            if name not in result:
+                result[name] = []
+
+for name in result:
+    for t in range(start_time, end_time, TIME_SPAN):
+        result[name].append([t, 0, 0])
+
 with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
     reader = csv.reader(csvfile, quotechar='"')
     for row in reader:
         if (row[3])[:1] == "5":
             timestamp = time.mktime(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S,%f").timetuple())
             name = row[1] + "*" + row[2]
-            if name not in result:
-                result[name] = []
-                result[name].append([timestamp, 1, 0])
-            else:
+
+            for name in result:
                 for item in result[name]:
-                    if abs(timestamp - item[0]) < 7.5 * 60:
+                    if item[0] <= timestamp < item[0] + TIME_SPAN:
                         item[1] += 1
-                        break
-                else:
-                    result[name].append([timestamp, 1, 0])
 
 is_anomaly(result)
 

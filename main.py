@@ -5,33 +5,31 @@ import MySQLdb
 
 from anomaly import is_anomaly
 
-TIME_SPAN = 900
+TIME_SPAN = 900  # 15 minutes
 result = {}
-with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
+with open('raw_data2.csv', 'rt', encoding="UTF-8") as csvfile:
     reader = csv.reader(csvfile, quotechar='"')
+
     for row in reader:
         if row[0] != "ts":
-            timestamp = time.mktime(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S,%f").timetuple())
+            timestamp = time.mktime(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S,%f").timetuple())  # generating a unix timestamp
 
-            name = row[1] + "*" + row[2]
+            name = row[1] + "*" + row[2]  # combining api_name and http_method into a pair name
 
             if 'start_time' not in locals():
                 start_time = timestamp
-            start_time = int(min(start_time, timestamp))
+            start_time = int(min(start_time, timestamp))  # earliest request
             if 'end_time' not in locals():
                 end_time = timestamp
-            end_time = int(max(end_time, timestamp))
+            end_time = int(max(end_time, timestamp))  # latest request
 
             if name not in result:
                 result[name] = []
 
-with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
-    reader = csv.reader(csvfile, quotechar='"')
-
-    name = row[1] + "*" + row[2]
-
     for t in range(start_time, end_time, TIME_SPAN):
-        result[name].append([t, 0, 0])
+        result[name].append([t, 0, 0])  # [timestamp, num of requests, is anomaly]
+
+    csvfile.seek(0)
 
     for row in reader:
         if (row[3])[:1] == "5":

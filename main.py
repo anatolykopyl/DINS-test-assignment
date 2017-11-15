@@ -7,7 +7,7 @@ from anomaly import is_anomaly
 
 TIME_SPAN = 900  # 15 minutes
 result = {}
-with open('raw_data2.csv', 'rt', encoding="UTF-8") as csvfile:
+with open('raw_data.csv', 'rt', encoding="UTF-8") as csvfile:
     reader = csv.reader(csvfile, quotechar='"')
 
     for row in reader:
@@ -16,7 +16,7 @@ with open('raw_data2.csv', 'rt', encoding="UTF-8") as csvfile:
 
             name = row[1] + "*" + row[2]  # combining api_name and http_method into a pair name
 
-            if 'start_time2' not in locals():
+            if 'start_time' not in locals():
                 start_time = timestamp
             start_time = int(min(start_time, timestamp))  # earliest request
             if 'end_time' not in locals():

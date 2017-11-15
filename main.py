@@ -16,7 +16,7 @@ with open('raw_data2.csv', 'rt', encoding="UTF-8") as csvfile:
 
             name = row[1] + "*" + row[2]  # combining api_name and http_method into a pair name
 
-            if 'start_time' not in locals():
+            if 'start_time2' not in locals():
                 start_time = timestamp
             start_time = int(min(start_time, timestamp))  # earliest request
             if 'end_time' not in locals():
@@ -45,8 +45,11 @@ is_anomaly(result)
 try:
     connection = MySQLdb.connect(host="127.0.0.1", user="user1", passwd="testserver", db="mydb")
     cursor = connection.cursor()
-    cursor.execute("CREATE TABLE result ( timeframe_start TIMESTAMP, api_name TEXT, http_method TEXT, \
-                    count_http_code_5xx INT, is_anomaly TINYINT(1) )")
+
+    cursor.execute("SHOW TABLES LIKE 'result'")
+    if not cursor.fetchone():  # check if table already exists
+        cursor.execute("CREATE TABLE result ( timeframe_start TIMESTAMP, api_name TEXT, http_method TEXT, \
+                        count_http_code_5xx INT, is_anomaly TINYINT(1) )")
 
     for name in result:
         for item in result[name]:
